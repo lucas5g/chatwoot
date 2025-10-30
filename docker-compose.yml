@@ -1,0 +1,48 @@
+services:
+  chatwoot:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: chatwoot-web
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: chatwoot-worker
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: chatwoot-postgres
+    environment:
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: chatwoot
+      POSTGRES_DB: chatwoot_production
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: chatwoot-redis
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  pg_data:
+  redis_data:
