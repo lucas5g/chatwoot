@@ -1,7 +1,12 @@
 # chatwoot
 
-docker compose exec chatwoot bundle exec rails db:setup
-docker compose run --rm rails bundle exec rails db:chatwoot_prepare
-docker compose run --rm chatwoot bundle exec rails db:chatwoot_prepare 
+## reset db
+docker compose exec chatwoot bundle exec rails db:setup  
 
-docker compose run --rm chatwoot bundle exec rails db:create
+## migration
+docker compose run --rm chatwoot bundle exec rails db:migrate
+
+
+
+## change file
+vi app/javascript/dashboard/constants/permissions.js 

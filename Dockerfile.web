@@ -1,4 +1,17 @@
 FROM chatwoot/chatwoot:latest
-RUN chmod +x docker/entrypoints/rails.sh
+
+# Instala Node.js, npm e pnpm no Alpine
+RUN apk add --no-cache nodejs npm && \
+    npm install -g pnpm@10
+
+# Faz as alterações no JS que você mencionou
+RUN sed -i "40s/\.\.\.ROLES/'administrator'/g" app/javascript/dashboard/constants/permissions.js && \
+    sed -i "48s/\.\.\.ROLES/'administrator'/g" app/javascript/dashboard/constants/permissions.js
+
+
+# Precompila os assets com uma SECRET_KEY_BASE fake
+RUN SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
+
+# Define o entrypoint padrão do Chatwoot
 ENTRYPOINT ["docker/entrypoints/rails.sh"]
 CMD ["bundle", "exec", "rails", "s", "-b", "0.0.0.0", "-p", "3000"]
