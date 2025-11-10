@@ -4,7 +4,7 @@ FROM chatwoot/chatwoot:latest
 RUN apk add --no-cache nodejs npm && \
     npm install -g pnpm@10
 
-# Faz as alterações no JS que você mencionou
+# Customizações no projeto
 RUN sed -i "40s/\.\.\.ROLES/'administrator'/g" app/javascript/dashboard/constants/permissions.js && \
     sed -i "48s/\.\.\.ROLES/'administrator'/g" app/javascript/dashboard/constants/permissions.js
 
