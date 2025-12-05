@@ -46,10 +46,13 @@ const copyGitSha = () => {
       <span class="px-2">{{ `v${globalConfig.appVersion}` }}</span>
       <span
         v-tooltip="t('COMPONENTS.CODE.BUTTON_TEXT')"
-        class="px-2 build-id cursor-pointer"
+        class="px-2 cursor-pointer build-id"
         @click="copyGitSha"
       >
         {{ `Build ${gitSha}` }}
+      </span>
+      <span>
+        05/12
       </span>
     </div>
   </div>
