@@ -44,6 +44,10 @@ if (isLibraryMode) {
 
 export default defineConfig({
   plugins: plugins,
+  server: {
+    host: process.env.VITE_RUBY_HOST || 'localhost',
+    allowedHosts: ['localhost', '127.0.0.1', 'vite']
+  },
   build: {
     rollupOptions: {
       output: {
@@ -51,24 +55,24 @@ export default defineConfig({
         // setting dir: isLibraryMode ? 'public/packs' : undefined will not work
         ...(isLibraryMode
           ? {
-              dir: 'public/packs',
-              entryFileNames: chunkInfo => {
-                if (chunkInfo.name === 'sdk') {
-                  return 'js/sdk.js';
-                }
-                return '[name].js';
-              },
-            }
+            dir: 'public/packs',
+            entryFileNames: chunkInfo => {
+              if (chunkInfo.name === 'sdk') {
+                return 'js/sdk.js';
+              }
+              return '[name].js';
+            },
+          }
           : {}),
         inlineDynamicImports: isLibraryMode, // Disable code-splitting for SDK
       },
     },
     lib: isLibraryMode
       ? {
-          entry: path.resolve(__dirname, './app/javascript/entrypoints/sdk.js'),
-          formats: ['iife'], // IIFE format for single file
-          name: 'sdk',
-        }
+        entry: path.resolve(__dirname, './app/javascript/entrypoints/sdk.js'),
+        formats: ['iife'], // IIFE format for single file
+        name: 'sdk',
+      }
       : undefined,
   },
   resolve: {
