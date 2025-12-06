@@ -8,7 +8,8 @@ import { useMapGetter, useStore } from 'dashboard/composables/store.js';
 import wootConstants from 'dashboard/constants/globals';
 import SelectMenu from 'dashboard/components-next/selectmenu/SelectMenu.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
-
+import { useAdmin } from 'dashboard/composables/useAdmin';
+const { isAdmin } = useAdmin();
 defineProps({
   isOnExpandedLayout: {
     type: Boolean,
@@ -133,6 +134,7 @@ const handleSortChange = value => {
 <template>
   <div class="relative flex">
     <NextButton
+      v-if="isAdmin"
       v-tooltip.right="$t('CHAT_LIST.SORT_TOOLTIP_LABEL')"
       icon="i-lucide-arrow-up-down"
       slate
