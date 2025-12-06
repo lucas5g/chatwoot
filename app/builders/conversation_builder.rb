@@ -2,10 +2,22 @@ class ConversationBuilder
   pattr_initialize [:params!, :contact_inbox!]
 
   def perform
-    look_up_exising_conversation || create_new_conversation
+    look_up_exising_conversation || block_if_open_conversation || create_new_conversation
   end
 
   private
+
+  def block_if_open_conversation
+    open_conversation = @contact_inbox.contact.conversations
+                          .where(status: [:open])
+                          .first
+    return nil unless open_conversation
+
+    conversation = Conversation.new
+    conversation.errors.add(:base, "Contato já possui uma conversa aberta ##{open_conversation.display_id}")
+    raise ActiveRecord::RecordInvalid.new(conversation)
+  end
+
 
   def look_up_exising_conversation
     return unless @contact_inbox.inbox.lock_to_single_conversation?

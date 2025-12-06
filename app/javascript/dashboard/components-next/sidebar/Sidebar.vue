@@ -19,6 +19,8 @@ import SidebarAccountSwitcher from './SidebarAccountSwitcher.vue';
 import Logo from 'next/icon/Logo.vue';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
 
+import { useAdmin } from 'dashboard/composables/useAdmin';
+const { isAdmin } = useAdmin();
 const props = defineProps({
   isMobileSidebarOpen: {
     type: Boolean,
@@ -581,6 +583,12 @@ const menuItems = computed(() => {
     },
   ];
 });
+const filteredMenuItems = computed(() => {
+  if (isAdmin.value) {
+    return menuItems.value;
+  }
+  return isAdmin.value ? menuItems.value : menuItems.value.filter(item => !['Portals', 'Captain', 'Settings', 'Inbox'].includes(item.name));
+});
 </script>
 
 <template>
@@ -639,7 +647,7 @@ const menuItems = computed(() => {
     <nav class="grid overflow-y-scroll flex-grow gap-2 px-2 pb-5 no-scrollbar">
       <ul class="flex flex-col gap-1.5 m-0 list-none">
         <SidebarGroup
-          v-for="item in menuItems"
+          v-for="item in filteredMenuItems"
           :key="item.name"
           v-bind="item"
         />
