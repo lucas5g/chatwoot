@@ -52,7 +52,7 @@ const copyGitSha = () => {
         {{ `Build ${gitSha}` }}
       </span>
       <span>
-        05/12 22:14
+        09/12 11:36
       </span>
     </div>
   </div>
