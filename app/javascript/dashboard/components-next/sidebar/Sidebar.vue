@@ -18,6 +18,7 @@ import ChannelLeaf from './ChannelLeaf.vue';
 import SidebarAccountSwitcher from './SidebarAccountSwitcher.vue';
 import Logo from 'next/icon/Logo.vue';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
+import { useAdmin } from 'dashboard/composables/useAdmin';
 
 const props = defineProps({
   isMobileSidebarOpen: {
@@ -37,6 +38,7 @@ const { accountScopedRoute, isOnChatwootCloud } = useAccount();
 const store = useStore();
 const searchShortcut = useKbd([`$mod`, 'k']);
 const { t } = useI18n();
+const { isAdmin } = useAdmin();
 
 const isACustomBrandedInstance = useMapGetter(
   'globalConfig/isACustomBrandedInstance'
@@ -215,7 +217,12 @@ const menuItems = computed(() => {
             }),
           })),
         },
-      ],
+      ].filter(item => {
+        if (item.name === 'Folders') {
+          return isAdmin.value;
+        }
+        return true;
+      }),
     },
     {
       name: 'Captain',
