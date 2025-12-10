@@ -7,8 +7,6 @@ import wootConstants from 'dashboard/constants/globals';
 import ConversationBasicFilter from './widgets/conversation/ConversationBasicFilter.vue';
 import SwitchLayout from 'dashboard/routes/dashboard/conversation/search/SwitchLayout.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
-import { useAdmin } from 'dashboard/composables/useAdmin';
-const { isAdmin } = useAdmin();
 
 const props = defineProps({
   pageTitle: { type: String, required: true },
@@ -140,7 +138,7 @@ const toggleConversationLayout = () => {
           @click="emit('deleteFolders')"
         />
       </template>
-      <div v-else-if="isAdmin" class="relative">
+      <div v-else class="relative">
         <NextButton
           id="toggleConversationFilterButton"
           v-tooltip.right="$t('FILTER.TOOLTIP_LABEL')"
