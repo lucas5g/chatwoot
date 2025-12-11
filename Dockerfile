@@ -18,8 +18,6 @@ WORKDIR /app
 RUN git clone https://github.com/lucas5g/chatwoot.git . && \
     git checkout custom-v4.8
 
-RUN sed "55c/11\/12  18:51/" app/javascript/dashboard/routes/dashboard/settings/account/components/BuildInfo.vue
-
 
 RUN bundle config set --local without 'development test'
 RUN gem install bundler -v 2.5.16
