@@ -32,6 +32,7 @@ import ConversationBulkActions from './widgets/conversation/conversationBulkActi
 import IntersectionObserver from './IntersectionObserver.vue';
 import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
+import { useAdmin } from 'dashboard/composables/useAdmin';
 
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import { useAlert } from 'dashboard/composables';
@@ -86,6 +87,7 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
+const { isAdmin } = useAdmin();
 
 const conversationListRef = ref(null);
 const conversationDynamicScroller = ref(null);
@@ -104,6 +106,7 @@ const showAddFoldersModal = ref(false);
 const showDeleteFoldersModal = ref(false);
 const isContextMenuOpen = ref(false);
 const appliedFilter = ref([]);
+const isUpdatingFromWatcher = ref(true);
 const advancedFilterTypes = ref(
   advancedFilterOptions.map(filter => ({
     ...filter,
@@ -269,9 +272,13 @@ const conversationListPagination = computed(() => {
 });
 
 const conversationFilters = computed(() => {
+  const assigneeType = isAdmin.value
+    ? activeAssigneeTab.value
+    : wootConstants.ASSIGNEE_TYPE.ME;
+
   return {
     inboxId: props.conversationInbox ? props.conversationInbox : undefined,
-    assigneeType: activeAssigneeTab.value,
+    assigneeType: assigneeType,
     status: activeStatus.value,
     sortBy: activeSortBy.value,
     page: conversationListPagination.value,
@@ -616,7 +623,10 @@ function updateAssigneeTab(selectedTab) {
     resetBulkActions();
     emitter.emit('clearSearchInput');
     activeAssigneeTab.value = selectedTab;
-    if (!currentPage.value) {
+
+    const shouldFetch = !currentPage.value && !isUpdatingFromWatcher.value;
+
+    if (shouldFetch) {
       fetchConversations();
     }
   }
