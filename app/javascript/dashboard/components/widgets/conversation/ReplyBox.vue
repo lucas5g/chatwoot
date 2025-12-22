@@ -207,6 +207,10 @@ export default {
     },
     isReplyButtonDisabled() {
       if (this.isATwitterInbox) return true;
+      
+      // Bloqueia envio de mensagens públicas se conversa não está aberta
+      if (!this.isPrivate && !this.isConversationOpen) return true;
+      
       if (this.hasAttachments || this.hasRecordedAudio) return false;
 
       return (
@@ -426,6 +430,9 @@ export default {
         this.quotedReplyPreference &&
         !!this.quotedEmailText
       );
+    },
+    isConversationOpen() {
+      return this.currentChat?.status === wootConstants.STATUS_TYPE.OPEN;
     },
   },
   watch: {
