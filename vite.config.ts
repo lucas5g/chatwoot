@@ -44,6 +44,17 @@ if (isLibraryMode) {
 
 export default defineConfig({
   plugins: plugins,
+  server:{
+    host: process.env.VITE_RUBY_HOST || 'localhost',
+    allowedHosts:['localhost', '127.0.0.1', 'vite'],
+    hmr: {
+      host: 'localhost',
+      clientPort: 3036,
+    },
+    watch: {
+      usePolling: true,
+    },
+  },
   build: {
     rollupOptions: {
       output: {
