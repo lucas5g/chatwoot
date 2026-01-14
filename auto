@@ -7,5 +7,6 @@ echo "Building Chatwoot Docker Image - Version: $version"
 
 docker images | grep $image | awk '{print $3}' | xargs -I {} docker rmi -f {}
 
-docker build -t $image:$version -f Dockerfile .
+docker build --no-cache -t $image:$version -f Dockerfile .
 docker push $image:$version
+
