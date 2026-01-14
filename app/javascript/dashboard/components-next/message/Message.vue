@@ -360,10 +360,7 @@ const contextMenuEnabledOptions = computed(() => {
 
   return {
     copy: hasText,
-    delete:
-      (hasText || hasAttachments) &&
-      !isFailedOrProcessing &&
-      !isMessageDeleted.value,
+    delete: false,    
     cannedResponse: isOutgoing && hasText && !isMessageDeleted.value,
     copyLink: !isFailedOrProcessing,
     translate: !isFailedOrProcessing && !isMessageDeleted.value && hasText,
