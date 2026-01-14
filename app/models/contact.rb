@@ -54,6 +54,8 @@ class Contact < ApplicationRecord
   validates :phone_number,
             allow_blank: true, uniqueness: { scope: [:account_id] },
             format: { with: /\+[1-9]\d{1,14}\z/, message: I18n.t('errors.contacts.phone_number.invalid') }
+  validate :phone_number_not_duplicate_by_suffix, if: -> { phone_number.present? && phone_number_changed? }
+
 
   belongs_to :account
   has_many :conversations, dependent: :destroy_async
@@ -244,6 +246,20 @@ class Contact < ApplicationRecord
 
   def dispatch_destroy_event
     Rails.configuration.dispatcher.dispatch(CONTACT_DELETED, Time.zone.now, contact: self)
+  end
+
+  def phone_number_not_duplicate_by_suffix
+   last_8_digits = phone_number.gsub(/\D/, '').last(8)
+    return if last_8_digits.length < 8
+
+    existing_contact = account.contacts
+                              .where.not(id: id)
+                              .where('RIGHT(REGEXP_REPLACE(phone_number, \'\\D\', \'\', \'g\'), 8) = ?', last_8_digits)
+                              .exists?
+
+    return unless existing_contact
+
+    errors.add(:phone_number, I18n.t('errors.contacts.phone_number.duplicate_suffix'))
   end
 end
 Contact.include_mod_with('Concerns::Contact')
