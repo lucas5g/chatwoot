@@ -176,8 +176,8 @@ const createConversation = async ({ payload, isFromWhatsApp }) => {
     return true; // Return success
   } catch (error) {
     useAlert(
-      error instanceof ExceptionWithMessage
-        ? error.data
+      error?.message && error.message !== "Error"
+        ? error.message
         : t('COMPOSE_NEW_CONVERSATION.FORM.ERROR_MESSAGE')
     );
     return false; // Return failure

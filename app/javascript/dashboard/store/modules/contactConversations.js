@@ -103,7 +103,7 @@ export const actions = {
 
       return data;
     } catch (error) {
-      throw new Error(error);
+      throw error?.response?.data?.message ? new Error(error.response.data.message) : new Error(error);
     } finally {
       commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
         isCreating: false,
