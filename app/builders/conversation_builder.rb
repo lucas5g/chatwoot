@@ -2,10 +2,19 @@ class ConversationBuilder
   pattr_initialize [:params!, :contact_inbox!]
 
   def perform
-    look_up_exising_conversation || block_if_open_conversation || create_new_conversation
+    block_if_out_of_office || look_up_exising_conversation || block_if_open_conversation || create_new_conversation
   end
 
   private
+
+  def block_if_out_of_office
+    inbox = @contact_inbox.inbox
+    return nil unless inbox.out_of_office?
+
+    conversation = Conversation.new
+    conversation.errors.add(:base, "Fora do horário de funcionamento")
+    raise ActiveRecord::RecordInvalid.new(conversation)
+  end
 
   def block_if_open_conversation
     open_conversation = @contact_inbox.contact.conversations
