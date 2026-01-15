@@ -117,3 +117,9 @@ volumes:
   node_modules:
   cache:
   bundle:
+
+networks:
+  default:
+    external: true
+    name: chatwoot-net
+    
