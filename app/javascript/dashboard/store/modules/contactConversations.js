@@ -63,8 +63,10 @@ const setNewConversationPayload = ({
 
 const state = {
   records: {},
+  meta: {},
   uiFlags: {
     isFetching: false,
+    isFetchingMore: false,
   },
 };
 
@@ -78,6 +80,13 @@ export const getters = {
   getAllConversationsByContactId: $state => id => {
     const records = $state.records[Number(id)] || [];
     return camelcaseKeys(records, { deep: true });
+  },
+  getMeta: $state => id => {
+    return $state.meta[Number(id)] || {};
+  },
+  getHasMore: $state => id => {
+    const meta = $state.meta[Number(id)] || {};
+    return meta.currentPage < meta.totalPages;
   },
 };
 
@@ -115,17 +124,47 @@ export const actions = {
       isFetching: true,
     });
     try {
-      const response = await ContactAPI.getConversations(contactId);
+      const response = await ContactAPI.getConversations(contactId, 1);
       commit(types.default.SET_CONTACT_CONVERSATIONS, {
         id: contactId,
         data: response.data.payload,
       });
+      commit(types.default.SET_CONTACT_CONVERSATIONS_META, {
+        id: contactId,
+        meta: response.data.meta,
+      });
+    } catch (error) {
+      // ignore error
+    } finally {
       commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
         isFetching: false,
       });
+    }
+  },
+  fetchMore: async ({ commit, state: $state }, contactId) => {
+    const meta = $state.meta[Number(contactId)] || {};
+    const nextPage = (meta.currentPage || 0) + 1;
+
+    if (meta.currentPage >= meta.totalPages) return;
+
+    commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
+      isFetchingMore: true,
+    });
+    try {
+      const response = await ContactAPI.getConversations(contactId, nextPage);
+      commit(types.default.APPEND_CONTACT_CONVERSATIONS, {
+        id: contactId,
+        data: response.data.payload,
+      });
+      commit(types.default.SET_CONTACT_CONVERSATIONS_META, {
+        id: contactId,
+        meta: response.data.meta,
+      });
     } catch (error) {
+      // ignore error
+    } finally {
       commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
-        isFetching: false,
+        isFetchingMore: false,
       });
     }
   },
@@ -142,6 +181,19 @@ export const mutations = {
     $state.records = {
       ...$state.records,
       [id]: data,
+    };
+  },
+  [types.default.SET_CONTACT_CONVERSATIONS_META]: ($state, { id, meta }) => {
+    $state.meta = {
+      ...$state.meta,
+      [id]: meta,
+    };
+  },
+  [types.default.APPEND_CONTACT_CONVERSATIONS]: ($state, { id, data }) => {
+    const existingRecords = $state.records[id] || [];
+    $state.records = {
+      ...$state.records,
+      [id]: [...existingRecords, ...data],
     };
   },
   [types.default.ADD_CONTACT_CONVERSATION]: ($state, { id, data }) => {
