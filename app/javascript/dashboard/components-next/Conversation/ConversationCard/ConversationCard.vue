@@ -37,10 +37,10 @@ const cardMessagePreviewWithMetaRef = ref(null);
 
 const currentContact = computed(() => props.contact);
 
-const currentContactName = computed(() => currentContact.value?.name);
-const currentContactThumbnail = computed(() => currentContact.value?.thumbnail);
+const currentContactName = computed(() => currentContact.value?.name || '');
+const currentContactThumbnail = computed(() => currentContact.value?.thumbnail || '');
 const currentContactStatus = computed(
-  () => currentContact.value?.availabilityStatus
+  () => currentContact.value?.availabilityStatus || ''
 );
 
 const inbox = computed(() => props.stateInbox);

@@ -12,6 +12,6 @@ class Api::V1::Accounts::Contacts::ConversationsController < Api::V1::Accounts::
       Current.account
     ).perform
 
-    @conversations = conversations.order(last_activity_at: :desc).limit(20)
+    @conversations = conversations.order(last_activity_at: :desc).page(params[:page]).per(10)
   end
 end

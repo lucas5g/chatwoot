@@ -83,7 +83,7 @@ const fetchContactNotes = () => {
 
 const fetchContactConversations = () => {
   const { contactId } = route.params;
-  if (contactId) store.dispatch('contactConversations/get', contactId);
+  if (contactId) store.dispatch('contactConversations/get', { contactId });
 };
 
 const fetchAttributes = () => {

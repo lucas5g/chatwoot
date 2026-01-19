@@ -61,5 +61,19 @@ RSpec.describe '/api/v1/accounts/{account.id}/contacts/:id/conversations', type:
         end
       end
     end
+
+    context 'pagination' do
+      before do
+        create_list(:conversation, 15, account: account, inbox: inbox_1, contact: contact, contact_inbox: contact_inbox_1)
+      end
+
+      it 'returns paginated conversations' do
+        get "/api/v1/accounts/#{account.id}/contacts/#{contact.id}/conversations?page=1", headers: admin.create_new_auth_token
+
+        expect(response).to have_http_status(:success)
+        json_response = response.parsed_body
+        expect(json_response['payload'].length).to eq 10
+      end
+    end
   end
 end

@@ -36,12 +36,16 @@ export default {
   watch: {
     contactId(newContactId, prevContactId) {
       if (newContactId && newContactId !== prevContactId) {
-        this.$store.dispatch('contactConversations/get', newContactId);
+        this.$store.dispatch('contactConversations/get', {
+          contactId: newContactId,
+        });
       }
     },
   },
   mounted() {
-    this.$store.dispatch('contactConversations/get', this.contactId);
+    this.$store.dispatch('contactConversations/get', {
+      contactId: this.contactId,
+    });
   },
 };
 </script>

@@ -110,16 +110,23 @@ export const actions = {
       });
     }
   },
-  get: async ({ commit }, contactId) => {
+  get: async ({ commit }, { contactId, page = 1 }) => {
     commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
       isFetching: true,
     });
     try {
-      const response = await ContactAPI.getConversations(contactId);
-      commit(types.default.SET_CONTACT_CONVERSATIONS, {
-        id: contactId,
-        data: response.data.payload,
-      });
+      const response = await ContactAPI.getConversations(contactId, page);
+      if (page === 1) {
+        commit(types.default.SET_CONTACT_CONVERSATIONS, {
+          id: contactId,
+          data: response.data.payload,
+        });
+      } else {
+        commit(types.default.APPEND_CONTACT_CONVERSATIONS, {
+          id: contactId,
+          data: response.data.payload,
+        });
+      }
       commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
         isFetching: false,
       });
@@ -142,6 +149,13 @@ export const mutations = {
     $state.records = {
       ...$state.records,
       [id]: data,
+    };
+  },
+  [types.default.APPEND_CONTACT_CONVERSATIONS]: ($state, { id, data }) => {
+    const conversations = $state.records[id] || [];
+    $state.records = {
+      ...$state.records,
+      [id]: [...conversations, ...data],
     };
   },
   [types.default.ADD_CONTACT_CONVERSATION]: ($state, { id, data }) => {

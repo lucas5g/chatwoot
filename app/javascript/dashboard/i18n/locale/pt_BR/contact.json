@@ -506,7 +506,8 @@
         "MERGE": "Mesclar"
       },
       "HISTORY": {
-        "EMPTY_STATE": "Não há conversas anteriores associadas a este contato"
+        "EMPTY_STATE": "Não há conversas anteriores associadas a este contato",
+        "END_OF_HISTORY": "Fim do histórico"
       },
       "ATTRIBUTES": {
         "SEARCH_PLACEHOLDER": "Pesquisar atributos",

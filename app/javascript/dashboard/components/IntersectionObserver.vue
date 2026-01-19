@@ -1,26 +1,35 @@
-<script setup>
-import { ref, defineEmits } from 'vue';
-import { useIntersectionObserver } from '@vueuse/core';
 
-const { options } = defineProps({
+<script setup>
+import { ref, onMounted, onUnmounted, defineEmits } from 'vue';
+
+const props = defineProps({
   options: {
     type: Object,
-    default: () => ({ root: document, rootMargin: '100px 0 100px 0)' }),
+    default: () => ({ root: null, rootMargin: '100px 0px 100px 0px' }),
   },
 });
 
 const emit = defineEmits(['observed']);
-const observedElement = ref('');
+const observer = ref(null);
+const observedElement = ref(null);
 
-useIntersectionObserver(
-  observedElement,
-  ([{ isIntersecting }]) => {
-    if (isIntersecting) {
+onMounted(() => {
+  observer.value = new IntersectionObserver(([entry]) => {
+    if (entry && entry.isIntersecting) {
       emit('observed');
     }
-  },
-  options
-);
+  }, props.options);
+
+  if (observedElement.value) {
+    observer.value.observe(observedElement.value);
+  }
+});
+
+onUnmounted(() => {
+  if (observer.value) {
+    observer.value.disconnect();
+  }
+});
 </script>
 
 <template>
