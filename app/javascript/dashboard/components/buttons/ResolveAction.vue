@@ -31,6 +31,16 @@ const openDropdown = () => toggleDropdown(true);
 
 const currentChat = computed(() => getters.getSelectedChat.value);
 
+const savedLabels = computed(() => {
+  return (
+    store.getters['conversationLabels/getConversationLabels'](
+      currentChat.value.id
+    ) || []
+  );
+});
+
+const hasLabels = computed(() => savedLabels.value.length > 0);
+
 const isOpen = computed(
   () => currentChat.value.status === wootConstants.STATUS_TYPE.OPEN
 );
@@ -78,9 +88,14 @@ const openSnoozeModal = () => {
 };
 
 const toggleStatus = (status, snoozedUntil) => {
+  if (status === wootConstants.STATUS_TYPE.RESOLVED && !hasLabels.value) {
+    useAlert(t('CONVERSATION.HEADER.RESOLVE_ACTION_DISABLED_HINT'));
+    return Promise.resolve();
+  }
+
   closeDropdown();
   isLoading.value = true;
-  store
+  return store
     .dispatch('toggleStatus', {
       conversationId: currentChat.value.id,
       status,
@@ -107,19 +122,23 @@ const keyboardEvents = {
   },
   'Alt+KeyE': {
     action: async () => {
-      await toggleStatus(wootConstants.STATUS_TYPE.RESOLVED);
+      if (hasLabels.value) {
+        await toggleStatus(wootConstants.STATUS_TYPE.RESOLVED);
+      }
     },
   },
   '$mod+Alt+KeyE': {
     action: async event => {
-      const { all, activeIndex, lastIndex } = getConversationParams();
-      await toggleStatus(wootConstants.STATUS_TYPE.RESOLVED);
+      if (hasLabels.value) {
+        const { all, activeIndex, lastIndex } = getConversationParams();
+        await toggleStatus(wootConstants.STATUS_TYPE.RESOLVED);
 
-      if (activeIndex < lastIndex) {
-        all[activeIndex + 1].click();
-      } else if (all.length > 1) {
-        all[0].click();
-        document.querySelector('.conversations-list').scrollTop = 0;
+        if (activeIndex < lastIndex) {
+          all[activeIndex + 1].click();
+        } else if (all.length > 1) {
+          all[0].click();
+          document.querySelector('.conversations-list').scrollTop = 0;
+        }
       }
       event.preventDefault();
     },
@@ -140,12 +159,16 @@ useEmitter(CMD_RESOLVE_CONVERSATION, onCmdResolveConversation);
     >
       <Button
         v-if="isOpen"
+        v-tooltip.top-end="
+          !hasLabels ? t('CONVERSATION.HEADER.RESOLVE_ACTION_DISABLED_HINT') : ''
+        "
         :label="t('CONVERSATION.HEADER.RESOLVE_ACTION')"
         size="sm"
         color="slate"
         no-animation
         class="ltr:rounded-r-none rtl:rounded-l-none !outline-0"
         :is-loading="isLoading"
+        :disabled="!hasLabels"
         @click="onCmdResolveConversation"
       />
       <Button

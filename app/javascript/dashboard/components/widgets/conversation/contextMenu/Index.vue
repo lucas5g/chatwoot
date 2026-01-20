@@ -61,6 +61,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    labels: {
+      type: Array,
+      default: () => [],
+    },
   },
   emits: [
     'updateConversation',
@@ -221,6 +225,10 @@ export default {
       return keys.some(key => this.allowedOptions.includes(key));
     },
     toggleStatus(status, snoozedUntil) {
+      if (status === wootConstants.STATUS_TYPE.RESOLVED && !this.labels?.length) {
+        useAlert(this.$t('CONVERSATION.HEADER.RESOLVE_ACTION_DISABLED_HINT'));
+        return;
+      }
       this.$emit('updateConversation', status, snoozedUntil);
     },
     async snoozeConversation() {
