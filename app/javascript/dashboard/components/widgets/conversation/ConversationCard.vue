@@ -382,7 +382,6 @@ const deleteConversation = () => {
         :has-unread-messages="hasUnread"
         :conversation-url="conversationPath"
         :allowed-options="allowedContextMenuOptions"
-        :labels="chat.labels"
         @update-conversation="onUpdateConversation"
         @assign-agent="onAssignAgent"
         @assign-label="onAssignLabel"
