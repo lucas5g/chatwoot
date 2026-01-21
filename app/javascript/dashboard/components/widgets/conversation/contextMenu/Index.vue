@@ -91,23 +91,7 @@ export default {
         label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.MARK_AS_UNREAD'),
         icon: 'mail-unread',
       },
-      statusMenuConfig: [
-        {
-          key: wootConstants.STATUS_TYPE.RESOLVED,
-          label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.RESOLVED'),
-          icon: 'checkmark',
-        },
-        {
-          key: wootConstants.STATUS_TYPE.OPEN,
-          label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.REOPEN'),
-          icon: 'arrow-redo',
-        },
-        {
-          key: wootConstants.STATUS_TYPE.PENDING,
-          label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.PENDING'),
-          icon: 'book-clock',
-        },
-      ],
+
       snoozeOption: {
         key: wootConstants.STATUS_TYPE.SNOOZED,
         label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.SNOOZE.TITLE'),
@@ -179,6 +163,7 @@ export default {
       assignableAgentsUiFlags: 'inboxAssignableAgents/getUIFlags',
       currentUser: 'getCurrentUser',
       currentAccountId: 'getCurrentAccountId',
+      getConversationLabels: 'conversationLabels/getConversationLabels',
     }),
     filteredAgentOnAvailability() {
       const agents = this.$store.getters[
@@ -210,6 +195,32 @@ export default {
     showSnooze() {
       // Don't show snooze if the conversation is already snoozed/resolved/pending
       return this.status === wootConstants.STATUS_TYPE.OPEN;
+    },
+    hasLabels() {
+      return (this.getConversationLabels(this.chatId) || []).length > 0;
+    },
+    statusMenuConfig() {
+      return [
+        {
+          key: wootConstants.STATUS_TYPE.RESOLVED,
+          label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.RESOLVED'),
+          icon: 'checkmark',
+          disabled: !this.hasLabels,
+          tooltip: !this.hasLabels
+            ? this.$t('CONVERSATION.HEADER.RESOLVE_ACTION_DISABLED_HINT')
+            : '',
+        },
+        {
+          key: wootConstants.STATUS_TYPE.OPEN,
+          label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.REOPEN'),
+          icon: 'arrow-redo',
+        },
+        {
+          key: wootConstants.STATUS_TYPE.PENDING,
+          label: this.$t('CONVERSATION.CARD_CONTEXT_MENU.PENDING'),
+          icon: 'book-clock',
+        },
+      ];
     },
   },
   mounted() {
@@ -298,9 +309,11 @@ export default {
         <MenuItem
           v-if="show(option.key) && isAllowed([MENU.STATUS])"
           :key="option.key"
+          v-tooltip.left="option.tooltip"
           :option="option"
+          :disabled="option.disabled"
           variant="icon"
-          @click.stop="toggleStatus(option.key, null)"
+          @click.stop="!option.disabled && toggleStatus(option.key, null)"
         />
       </template>
       <MenuItem

@@ -10,11 +10,19 @@ defineProps({
     type: String,
     default: 'default',
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 
 <template>
-  <div class="menu text-n-slate-12 min-h-7 min-w-0" role="button">
+  <div
+    class="menu text-n-slate-12 min-h-7 min-w-0"
+    role="button"
+    :class="{ disabled }"
+  >
     <fluent-icon
       v-if="variant === 'icon' && option.icon"
       :icon="option.icon"
@@ -51,6 +59,14 @@ defineProps({
 
   &:hover {
     @apply bg-n-brand text-white;
+  }
+
+  &.disabled {
+    @apply opacity-50 cursor-not-allowed;
+
+    &:hover {
+      @apply bg-transparent text-n-slate-12;
+    }
   }
 }
 
