@@ -66,6 +66,7 @@ class Message < ApplicationRecord
   before_validation :prevent_message_flooding
   before_save :ensure_processed_message_content
   before_save :ensure_in_reply_to
+  before_create :ensure_active_conversation_for_api
 
   validates :account_id, presence: true
   validates :inbox_id, presence: true
@@ -381,7 +382,7 @@ class Message < ApplicationRecord
       conversation.pending!
     elsif conversation.inbox.api?
       Current.executed_by = sender if reopened_by_contact?
-      # conversation.open!
+      conversation.open!
     else
       conversation.open!
     end
@@ -407,6 +408,31 @@ class Message < ApplicationRecord
 
   def reindex_for_search
     reindex(mode: :async)
+  end
+
+  def ensure_active_conversation_for_api
+    return unless inbox.api?
+    return if inbox.lock_to_single_conversation?
+    return unless incoming? && conversation.resolved?
+
+    # Check if there is an existing active conversation to prevent multiple conversations
+    # when messages are sent in a burst
+    active_conversation = conversation.contact_inbox.conversations
+                                      .where(status: [:open, :pending])
+                                      .last
+
+    if active_conversation
+      self.conversation = active_conversation
+    else
+      new_conversation = Conversation.create!(
+        account_id: account_id,
+        inbox_id: inbox_id,
+        contact_id: conversation.contact_id,
+        contact_inbox_id: conversation.contact_inbox_id,
+        status: :open
+      )
+      self.conversation = new_conversation
+    end
   end
 end
 
