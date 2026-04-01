@@ -1,0 +1,55 @@
+diff --git a/app/javascript/dashboard/components/ChatList.vue b/app/javascript/dashboard/components/ChatList.vue
+index 406b23d97..3727a16c3 100644
+--- a/app/javascript/dashboard/components/ChatList.vue
++++ b/app/javascript/dashboard/components/ChatList.vue
+@@ -32,7 +32,6 @@ import ConversationBulkActions from './widgets/conversation/conversationBulkActi
+ import IntersectionObserver from './IntersectionObserver.vue';
+ import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
+ import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
+-import { useAdmin } from 'dashboard/composables/useAdmin';
+ 
+ import { useUISettings } from 'dashboard/composables/useUISettings';
+ import { useAlert } from 'dashboard/composables';
+@@ -87,7 +86,6 @@ const { t } = useI18n();
+ const router = useRouter();
+ const route = useRoute();
+ const store = useStore();
+-const { isAdmin } = useAdmin();
+ 
+ const conversationListRef = ref(null);
+ const conversationDynamicScroller = ref(null);
+@@ -106,7 +104,6 @@ const showAddFoldersModal = ref(false);
+ const showDeleteFoldersModal = ref(false);
+ const isContextMenuOpen = ref(false);
+ const appliedFilter = ref([]);
+-const isUpdatingFromWatcher = ref(true);
+ const advancedFilterTypes = ref(
+   advancedFilterOptions.map(filter => ({
+     ...filter,
+@@ -272,13 +269,9 @@ const conversationListPagination = computed(() => {
+ });
+ 
+ const conversationFilters = computed(() => {
+-  const assigneeType = isAdmin.value
+-    ? activeAssigneeTab.value
+-    : wootConstants.ASSIGNEE_TYPE.ME;
+-
+   return {
+     inboxId: props.conversationInbox ? props.conversationInbox : undefined,
+-    assigneeType: assigneeType,
++    assigneeType: activeAssigneeTab.value,
+     status: activeStatus.value,
+     sortBy: activeSortBy.value,
+     page: conversationListPagination.value,
+@@ -623,10 +616,7 @@ function updateAssigneeTab(selectedTab) {
+     resetBulkActions();
+     emitter.emit('clearSearchInput');
+     activeAssigneeTab.value = selectedTab;
+-
+-    const shouldFetch = !currentPage.value && !isUpdatingFromWatcher.value;
+-
+-    if (shouldFetch) {
++    if (!currentPage.value) {
+       fetchConversations();
+     }
+   }
